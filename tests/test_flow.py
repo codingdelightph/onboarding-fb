@@ -278,3 +278,47 @@ def test_saturday_sets_day_and_asks_time(mocker):
     user = state.get(PSID)
     assert user["availability_day"] == "Saturday"
     assert user["step"] == "preferred_time"
+
+
+# ── invalid payload fallbacks for Task 7 handlers ────────────────────────────
+
+def test_invalid_generation_old_resends_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="generation_old")
+    flow.dispatch(PSID, "/nonsense")
+    assert state.get(PSID)["step"] == "generation_old"
+
+
+def test_invalid_life_stage_old_resends_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="life_stage_old")
+    flow.dispatch(PSID, "/nonsense")
+    assert state.get(PSID)["step"] == "life_stage_old"
+
+
+def test_invalid_availability_group_resends_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_group")
+    flow.dispatch(PSID, "/nonsense")
+    assert state.get(PSID)["step"] == "availability_group"
+
+
+def test_invalid_availability_mwf_resends_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_mwf")
+    flow.dispatch(PSID, "/nonsense")
+    assert state.get(PSID)["step"] == "availability_mwf"
+
+
+def test_invalid_availability_tth_resends_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_tth")
+    flow.dispatch(PSID, "/nonsense")
+    assert state.get(PSID)["step"] == "availability_tth"
+
+
+def test_invalid_availability_weekend_resends_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_weekend")
+    flow.dispatch(PSID, "/nonsense")
+    assert state.get(PSID)["step"] == "availability_weekend"
