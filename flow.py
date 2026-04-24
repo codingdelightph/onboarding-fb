@@ -141,6 +141,130 @@ def handle_paused(psid: str, payload: str) -> None:
         state.update(psid, step="membership")
 
 
+def handle_invite(psid: str, payload: str) -> None:
+    if payload == "will_join":
+        facebook.send_buttons(
+            psid,
+            "Which age group best describes you?",
+            [
+                {"type": "postback", "title": "🧒 Younger (below 44)", "payload": "/younger_group"},
+                {"type": "postback", "title": "👴 Seasoned (44+)", "payload": "/older_group"},
+            ],
+        )
+        state.update(psid, step="age_group")
+    elif payload == "not_joining":
+        facebook.send_message(
+            psid,
+            "No problem! Take your time. Let me know if you change your mind or have any other questions.",
+        )
+        state.update(psid, step="done")
+    elif payload == "request_handoff":
+        handle_handoff(psid, payload)
+    else:
+        facebook.send_buttons(
+            psid,
+            "Would you like to join a D-Group?",
+            [
+                {"type": "postback", "title": "✅ I want to join", "payload": "/will_join"},
+                {"type": "postback", "title": "⏳ I need more time", "payload": "/not_joining"},
+                {"type": "postback", "title": "📞 Talk to a person", "payload": "/request_handoff"},
+            ],
+        )
+
+
+def handle_age_group(psid: str, payload: str) -> None:
+    if payload == "younger_group":
+        facebook.send_buttons(
+            psid,
+            "Please select your life stage:",
+            [
+                {"type": "postback", "title": "👩‍💻 Elevate or B1G", "payload": "/elevate_B1G"},
+                {"type": "postback", "title": "💍 Couple", "payload": "/married"},
+                {"type": "postback", "title": "🧑‍🍼 Solo Parent", "payload": "/solo_parent"},
+            ],
+        )
+        state.update(psid, step="life_stage_young")
+    elif payload == "older_group":
+        facebook.send_buttons(
+            psid,
+            "Are you a Gen X (1965–1980) or Baby Boomer (1946–1964)?",
+            [
+                {"type": "postback", "title": "🧓 Gen X", "payload": "/gen_x"},
+                {"type": "postback", "title": "👴 Baby Boomers", "payload": "/baby_boomers"},
+            ],
+        )
+        state.update(psid, step="generation_old")
+    else:
+        facebook.send_buttons(
+            psid,
+            "Which age group best describes you?",
+            [
+                {"type": "postback", "title": "🧒 Younger (below 44)", "payload": "/younger_group"},
+                {"type": "postback", "title": "👴 Seasoned (44+)", "payload": "/older_group"},
+            ],
+        )
+
+
+def handle_life_stage_young(psid: str, payload: str) -> None:
+    if payload == "elevate_b1g":
+        facebook.send_buttons(
+            psid,
+            "Elevate or B1G — which one?",
+            [
+                {"type": "postback", "title": "👩‍💻 Elevate — Students", "payload": "/elevate"},
+                {"type": "postback", "title": "👩‍💻 B1G — Young Professional", "payload": "/young_professionals"},
+            ],
+        )
+        state.update(psid, step="elevate_b1g")
+    elif payload == "married":
+        state.update(psid, life_stage="married", marital_status="Married", age_group="Millennials")
+        _ask_availability_group(psid)
+    elif payload == "solo_parent":
+        state.update(psid, life_stage="solo_parent", marital_status="Solo Parent", age_group="Gen X")
+        _ask_gender(psid)
+    else:
+        facebook.send_buttons(
+            psid,
+            "Please select your life stage:",
+            [
+                {"type": "postback", "title": "👩‍💻 Elevate or B1G", "payload": "/elevate_B1G"},
+                {"type": "postback", "title": "💍 Couple", "payload": "/married"},
+                {"type": "postback", "title": "🧑‍🍼 Solo Parent", "payload": "/solo_parent"},
+            ],
+        )
+
+
+def handle_elevate_b1g(psid: str, payload: str) -> None:
+    if payload == "elevate":
+        state.update(psid, life_stage="elevate", marital_status="Young Adult", age_group="Gen Z")
+        _ask_gender(psid)
+    elif payload == "young_professionals":
+        state.update(
+            psid,
+            life_stage="young_professionals",
+            marital_status="Young Adult",
+            age_group="Millennials",
+        )
+        _ask_gender(psid)
+    else:
+        facebook.send_buttons(
+            psid,
+            "Elevate or B1G — which one?",
+            [
+                {"type": "postback", "title": "👩‍💻 Elevate — Students", "payload": "/elevate"},
+                {"type": "postback", "title": "👩‍💻 B1G — Young Professional", "payload": "/young_professionals"},
+            ],
+        )
+
+
+def handle_gender(psid: str, payload: str) -> None:
+    if payload in ("male", "female"):
+        state.update(psid, gender=payload)
+        _ask_availability_group(psid)
+    else:
+        _ask_gender(psid)
+
+
 # ── HANDLERS dict ────────────────────────────────────────────────────────────
 
 HANDLERS: dict[str, Callable[[str, str], None]] = {}
@@ -165,6 +289,11 @@ HANDLERS.update({
     "start": handle_start,
     "privacy": handle_privacy,
     "membership": handle_membership,
+    "invite": handle_invite,
+    "age_group": handle_age_group,
+    "life_stage_young": handle_life_stage_young,
+    "elevate_b1g": handle_elevate_b1g,
+    "gender": handle_gender,
     # NOTE: "done" is intentionally omitted — any new message from a user in
     # the "done" step falls back to the default handle_start, restarting the flow.
     "handoff": handle_handoff,

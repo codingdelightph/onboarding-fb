@@ -61,3 +61,119 @@ def test_not_member_sends_invite_buttons(mocker):
     flow.dispatch(PSID, "/not_member")
     assert state.get(PSID)["step"] == "invite"
     flow.facebook.send_buttons.assert_called_once()
+
+
+# ── invite ───────────────────────────────────────────────────────────────────
+
+def test_will_join_sends_age_group_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="invite")
+    flow.dispatch(PSID, "/will_join")
+    assert state.get(PSID)["step"] == "age_group"
+
+
+def test_not_joining_sends_farewell_and_done(mocker):
+    mocker.patch("flow.facebook.send_message")
+    state.update(PSID, step="invite")
+    flow.dispatch(PSID, "/not_joining")
+    assert state.get(PSID)["step"] == "done"
+
+
+def test_invite_request_handoff_triggers_handoff(mocker):
+    mocker.patch("flow.facebook.send_message")
+    mocker.patch("flow.facebook.handoff_to_human")
+    state.update(PSID, step="invite")
+    flow.dispatch(PSID, "/request_handoff")
+    assert state.get(PSID)["step"] == "paused"
+
+
+# ── age_group ────────────────────────────────────────────────────────────────
+
+def test_younger_group_sends_life_stage_young_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="age_group")
+    flow.dispatch(PSID, "/younger_group")
+    assert state.get(PSID)["step"] == "life_stage_young"
+
+
+def test_older_group_sends_generation_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="age_group")
+    flow.dispatch(PSID, "/older_group")
+    assert state.get(PSID)["step"] == "generation_old"
+
+
+# ── life_stage_young ─────────────────────────────────────────────────────────
+
+def test_elevate_b1g_sends_sub_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="life_stage_young")
+    flow.dispatch(PSID, "/elevate_B1G")
+    assert state.get(PSID)["step"] == "elevate_b1g"
+
+
+def test_younger_married_sets_millennials_married_and_asks_day(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="life_stage_young")
+    flow.dispatch(PSID, "/married")
+    user = state.get(PSID)
+    assert user["age_group"] == "Millennials"
+    assert user["marital_status"] == "Married"
+    assert user["step"] == "availability_group"
+
+
+def test_solo_parent_sets_state_and_asks_gender(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="life_stage_young")
+    flow.dispatch(PSID, "/solo_parent")
+    user = state.get(PSID)
+    assert user["marital_status"] == "Solo Parent"
+    assert user["age_group"] == "Gen X"
+    assert user["step"] == "gender"
+
+
+# ── elevate_b1g ──────────────────────────────────────────────────────────────
+
+def test_elevate_sets_gen_z_young_adult_and_asks_gender(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="elevate_b1g")
+    flow.dispatch(PSID, "/elevate")
+    user = state.get(PSID)
+    assert user["age_group"] == "Gen Z"
+    assert user["marital_status"] == "Young Adult"
+    assert user["step"] == "gender"
+
+
+def test_young_professionals_sets_millennials_and_asks_gender(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="elevate_b1g")
+    flow.dispatch(PSID, "/young_professionals")
+    user = state.get(PSID)
+    assert user["age_group"] == "Millennials"
+    assert user["marital_status"] == "Young Adult"
+    assert user["step"] == "gender"
+
+
+# ── gender ───────────────────────────────────────────────────────────────────
+
+def test_gender_male_stores_and_asks_availability(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="gender")
+    flow.dispatch(PSID, "/male")
+    assert state.get(PSID)["gender"] == "male"
+    assert state.get(PSID)["step"] == "availability_group"
+
+
+def test_gender_female_stores_and_asks_availability(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="gender")
+    flow.dispatch(PSID, "/female")
+    assert state.get(PSID)["gender"] == "female"
+    assert state.get(PSID)["step"] == "availability_group"
+
+
+def test_unknown_gender_resends_gender_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="gender")
+    flow.dispatch(PSID, "/something")
+    assert state.get(PSID)["step"] == "gender"
