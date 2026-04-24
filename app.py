@@ -1,6 +1,7 @@
+import hmac
 import logging
 from fastapi import FastAPI, Request
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 import uvicorn
 from config import Config
 import flow
@@ -13,7 +14,7 @@ app = FastAPI()
 async def verify_webhook(request: Request) -> PlainTextResponse:
     token = request.query_params.get("hub.verify_token", "")
     challenge = request.query_params.get("hub.challenge", "")
-    if token == Config.VERIFY_TOKEN:
+    if hmac.compare_digest(token, Config.VERIFY_TOKEN):
         return PlainTextResponse(challenge)
     return PlainTextResponse("Forbidden", status_code=403)
 
@@ -23,7 +24,7 @@ async def webhook(request: Request):
     try:
         data = await request.json()
     except Exception:
-        return {"status": "bad_request"}
+        return JSONResponse({"status": "bad_request"}, status_code=400)
 
     if data.get("object") != "page":
         return {"status": "ignored"}
@@ -40,6 +41,8 @@ async def webhook(request: Request):
                     prev_app = messaging["pass_thread_control"].get("previous_owner_app_id", "")
                     if prev_app == Config.PAGE_INBOX_APP_ID:
                         flow.dispatch(psid, "agent_resume")
+                    else:
+                        logger.warning("Unexpected pass_thread_control from app_id=%s for psid=%s", prev_app, psid)
                     continue
 
                 # Postback button tap

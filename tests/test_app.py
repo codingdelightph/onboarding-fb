@@ -1,7 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch
-import state
 
 
 @pytest.fixture
@@ -89,3 +88,36 @@ def test_webhook_post_non_page_object_ignored(client, mocker):
     response = client.post("/webhook", json=payload)
     assert response.status_code == 200
     mock_dispatch.assert_not_called()
+
+
+def test_webhook_post_wrong_app_id_does_not_dispatch(client, mocker):
+    mock_dispatch = mocker.patch("app.flow.dispatch")
+    payload = {
+        "object": "page",
+        "entry": [{"messaging": [{
+            "sender": {"id": "psid_000"},
+            "pass_thread_control": {"previous_owner_app_id": "9999999999"},
+        }]}]
+    }
+    response = client.post("/webhook", json=payload)
+    assert response.status_code == 200
+    mock_dispatch.assert_not_called()
+
+
+def test_webhook_post_message_without_text_does_not_dispatch(client, mocker):
+    mock_dispatch = mocker.patch("app.flow.dispatch")
+    payload = {
+        "object": "page",
+        "entry": [{"messaging": [{
+            "sender": {"id": "psid_111"},
+            "message": {"attachments": [{"type": "image"}]},
+        }]}]
+    }
+    response = client.post("/webhook", json=payload)
+    assert response.status_code == 200
+    mock_dispatch.assert_not_called()
+
+
+def test_webhook_post_bad_json_returns_400(client):
+    response = client.post("/webhook", content=b"not json", headers={"Content-Type": "application/json"})
+    assert response.status_code == 400
