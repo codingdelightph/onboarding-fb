@@ -472,6 +472,12 @@ def handle_wind_down(psid: str, payload: str) -> None:
     if payload == "get_started":
         state.reset(psid)
         handle_start(psid, payload)
+    elif payload == "revert_seeker":
+        facebook.send_message(
+            psid,
+            "No problem! Take your time. We'll be here when you're ready. God bless! 🙏",
+        )
+        state.update(psid, step="done")
     else:
         facebook.send_message(psid, "Thank you! God bless! 🙏")
         state.update(psid, step="done")

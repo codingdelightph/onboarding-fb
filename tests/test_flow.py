@@ -438,3 +438,25 @@ def test_wind_down_im_good_sends_farewell(mocker):
     flow.dispatch(PSID, "/wind_down")
     assert state.get(PSID)["step"] == "done"
     flow.facebook.send_message.assert_called_once()
+
+
+def test_wind_down_revert_seeker_sends_followup(mocker):
+    mocker.patch("flow.facebook.send_message")
+    state.update(PSID, step="wind_down")
+    flow.dispatch(PSID, "/revert_seeker")
+    assert state.get(PSID)["step"] == "done"
+    flow.facebook.send_message.assert_called_once()
+
+
+def test_invalid_preferred_time_resends_time_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="preferred_time")
+    flow.dispatch(PSID, "/nonsense")
+    assert state.get(PSID)["step"] == "preferred_time"
+
+
+def test_invalid_mobile_prompt_resends_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="mobile_prompt")
+    flow.dispatch(PSID, "/nonsense")
+    assert state.get(PSID)["step"] == "mobile_prompt"
