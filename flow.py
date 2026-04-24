@@ -394,6 +394,89 @@ def handle_availability_weekend(psid: str, payload: str) -> None:
         )
 
 
+_MOBILE_RE = re.compile(r"^(\+63|0)9\d{9}$")
+
+
+def handle_preferred_time(psid: str, payload: str) -> None:
+    if payload not in ("afternoon", "evening", "specific_hours"):
+        _ask_preferred_time(psid)
+        return
+    state.update(psid, preferred_time=payload)
+    user = state.get(psid)
+    result = schedule.find_schedule(
+        age_group=user["age_group"],
+        marital_status=user["marital_status"],
+        day=user["availability_day"],
+        preferred_time=payload,
+    )
+    if result:
+        facebook.send_message(psid, result)
+    else:
+        facebook.send_message(
+            psid,
+            "Sorry, I couldn't find a schedule matching your profile. "
+            "A team member will follow up with you.",
+        )
+    facebook.send_buttons(
+        psid,
+        "Happy to share your mobile number?",
+        [
+            {"type": "postback", "title": "📱 Take my number!", "payload": "/provide_mobile"},
+            {"type": "postback", "title": "🙅 I'm not ready to share", "payload": "/not_ready_to_share"},
+            {"type": "postback", "title": "📞 Talk to a person", "payload": "/request_handoff"},
+        ],
+    )
+    state.update(psid, step="mobile_prompt")
+
+
+def handle_mobile_prompt(psid: str, payload: str) -> None:
+    if payload == "provide_mobile":
+        facebook.send_message(psid, "Could you please share your mobile number?")
+        state.update(psid, step="collect_mobile")
+    elif payload == "not_ready_to_share":
+        _show_wind_down(psid)
+    elif payload == "request_handoff":
+        handle_handoff(psid, payload)
+    else:
+        facebook.send_buttons(
+            psid,
+            "Happy to share your mobile number?",
+            [
+                {"type": "postback", "title": "📱 Take my number!", "payload": "/provide_mobile"},
+                {"type": "postback", "title": "🙅 I'm not ready to share", "payload": "/not_ready_to_share"},
+                {"type": "postback", "title": "📞 Talk to a person", "payload": "/request_handoff"},
+            ],
+        )
+
+
+def handle_collect_mobile(psid: str, payload: str) -> None:
+    if _MOBILE_RE.match(payload.strip()):
+        state.update(psid, mobile_number=payload.strip())
+        user = state.get(psid)
+        summary = (
+            f"Wonderful! {user['first_name']} {user['last_name']}\n"
+            f"You belong to {user['age_group']}!\n"
+            f"You are free on {user['availability_day']}.\n"
+            f"Your preferred time is {user['preferred_time']}.\n"
+            f"You'll probably fit right in with the {user['marital_status']} group.\n"
+            f"Your mobile number: {user['mobile_number']}. "
+            "You can ask us to remove your mobile number from our records anytime."
+        )
+        facebook.send_message(psid, summary)
+        _show_wind_down(psid)
+    else:
+        facebook.send_message(psid, "Please send a valid PH mobile number (e.g. 09171234567).")
+
+
+def handle_wind_down(psid: str, payload: str) -> None:
+    if payload == "get_started":
+        state.reset(psid)
+        handle_start(psid, payload)
+    else:
+        facebook.send_message(psid, "Thank you! God bless! 🙏")
+        state.update(psid, step="done")
+
+
 # ── HANDLERS dict ────────────────────────────────────────────────────────────
 
 HANDLERS: dict[str, Callable[[str, str], None]] = {}
@@ -429,6 +512,10 @@ HANDLERS.update({
     "availability_mwf": handle_availability_mwf,
     "availability_tth": handle_availability_tth,
     "availability_weekend": handle_availability_weekend,
+    "preferred_time": handle_preferred_time,
+    "mobile_prompt": handle_mobile_prompt,
+    "collect_mobile": handle_collect_mobile,
+    "wind_down": handle_wind_down,
     # NOTE: "done" is intentionally omitted — any new message from a user in
     # the "done" step falls back to the default handle_start, restarting the flow.
     "handoff": handle_handoff,

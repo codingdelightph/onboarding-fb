@@ -322,3 +322,119 @@ def test_invalid_availability_weekend_resends_buttons(mocker):
     state.update(PSID, step="availability_weekend")
     flow.dispatch(PSID, "/nonsense")
     assert state.get(PSID)["step"] == "availability_weekend"
+
+
+# ── preferred_time ───────────────────────────────────────────────────────────
+
+def test_afternoon_shows_schedule_and_asks_mobile(mocker):
+    mocker.patch("flow.schedule.find_schedule", return_value="Group on Monday led by John.")
+    mocker.patch("flow.facebook.send_message")
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(
+        PSID,
+        step="preferred_time",
+        age_group="Gen Z",
+        marital_status="Young Adult",
+        availability_day="Monday",
+    )
+    flow.dispatch(PSID, "/afternoon")
+    assert state.get(PSID)["preferred_time"] == "afternoon"
+    assert state.get(PSID)["step"] == "mobile_prompt"
+    flow.facebook.send_message.assert_called_with(PSID, "Group on Monday led by John.")
+
+
+def test_no_schedule_found_sends_sorry_message(mocker):
+    mocker.patch("flow.schedule.find_schedule", return_value="")
+    mocker.patch("flow.facebook.send_message")
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(
+        PSID,
+        step="preferred_time",
+        age_group="Gen Z",
+        marital_status="Widowed",
+        availability_day="Monday",
+    )
+    flow.dispatch(PSID, "/evening")
+    flow.facebook.send_message.assert_called_with(
+        PSID,
+        "Sorry, I couldn't find a schedule matching your profile. "
+        "A team member will follow up with you.",
+    )
+
+
+# ── mobile_prompt ─────────────────────────────────────────────────────────────
+
+def test_provide_mobile_asks_for_number(mocker):
+    mocker.patch("flow.facebook.send_message")
+    state.update(PSID, step="mobile_prompt")
+    flow.dispatch(PSID, "/provide_mobile")
+    assert state.get(PSID)["step"] == "collect_mobile"
+    flow.facebook.send_message.assert_called_once()
+
+
+def test_not_ready_goes_to_wind_down(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="mobile_prompt")
+    flow.dispatch(PSID, "/not_ready_to_share")
+    assert state.get(PSID)["step"] == "wind_down"
+
+
+# ── collect_mobile ────────────────────────────────────────────────────────────
+
+def test_valid_mobile_stores_number_and_shows_summary(mocker):
+    mocker.patch("flow.facebook.send_message")
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(
+        PSID,
+        step="collect_mobile",
+        first_name="Juan",
+        last_name="Cruz",
+        age_group="Gen Z",
+        availability_day="Monday",
+        preferred_time="afternoon",
+        marital_status="Young Adult",
+    )
+    flow.dispatch(PSID, "09171234567")
+    assert state.get(PSID)["mobile_number"] == "09171234567"
+    assert state.get(PSID)["step"] == "wind_down"
+    flow.facebook.send_message.assert_called_once()
+
+
+def test_valid_international_mobile_stored(mocker):
+    mocker.patch("flow.facebook.send_message")
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="collect_mobile", first_name="M", last_name="S",
+                 age_group="Gen Z", availability_day="Monday",
+                 preferred_time="afternoon", marital_status="Young Adult")
+    flow.dispatch(PSID, "+639171234567")
+    assert state.get(PSID)["mobile_number"] == "+639171234567"
+
+
+def test_invalid_mobile_sends_error_and_stays(mocker):
+    mocker.patch("flow.facebook.send_message")
+    state.update(PSID, step="collect_mobile")
+    flow.dispatch(PSID, "not-a-number")
+    assert state.get(PSID)["step"] == "collect_mobile"
+    flow.facebook.send_message.assert_called_with(
+        PSID,
+        "Please send a valid PH mobile number (e.g. 09171234567).",
+    )
+
+
+# ── wind_down ─────────────────────────────────────────────────────────────────
+
+def test_wind_down_get_started_resets_and_sends_privacy(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="wind_down", first_name="Juan", mobile_number="09171234567")
+    flow.dispatch(PSID, "/get_started")
+    user = state.get(PSID)
+    assert user["step"] == "privacy"   # after reset + handle_start, step is "privacy"
+    assert user["first_name"] == ""    # reset clears the name
+
+
+def test_wind_down_im_good_sends_farewell(mocker):
+    mocker.patch("flow.facebook.send_message")
+    state.update(PSID, step="wind_down")
+    flow.dispatch(PSID, "/wind_down")
+    assert state.get(PSID)["step"] == "done"
+    flow.facebook.send_message.assert_called_once()
