@@ -1,0 +1,14 @@
+satellite,day,age_group,marital_status,leader,start_time,end_time
+Imus,Monday,Gen Z,Young Adult,John Doe,2:00 PM,4:00 PM
+Imus,Monday,Millennials,Young Adult,Jane Smith,3:00 PM,5:00 PM
+Imus,Monday,Millennials,Married,Juan Sicat,2:00 PM,4:00 PM
+Imus,Monday,Baby Boomer,Married,Pedro Dy,6:30 PM,9:00 PM
+Bacoor,Monday,Baby Boomer,Married,Pedro Bacoor,6:30 PM,9:00 PM
+Imus,Tuesday,Gen X,Solo Parent,Tom Brown,2:00 PM,9:00 PM
+Imus,Tuesday,Millennials,Young Adult,Jane Smith,4:00 PM,7:00 PM
+Bacoor,Tuesday,Millennials,Young Adult,Jane Bacoor,4:00 PM,7:00 PM
+Imus,Wednesday,Gen Z,Single,Anna Lee,2:00 PM,9:00 PM
+Imus,Thursday,Baby Boomer,Married,Lucy Green,2:00 PM,9:00 PM
+Imus,Friday,Gen X,Solo Parent,Mark Davis,2:00 PM,9:00 PM
+Imus,Saturday,Millennials,Single,Emily White,2:00 PM,9:00 PM
+Imus,Sunday,Baby Boomer,Married,Michael Johnson,2:00 PM,9:00 PM

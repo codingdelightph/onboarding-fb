@@ -1,0 +1,4 @@
+title,image_url,subtitle,button_titles,button_payloads
+MWF Schedule,https://example.com/mwf-schedule.jpg,Choose schedules for Monday, Wednesday, and Friday.,Select MWF,/schedule_mwf
+TTh Schedule,https://example.com/tth-schedule.jpg,Choose schedules for Tuesday and Thursday.,Select TTh,/schedule_tth
+Weekend Schedule,https://example.com/weekend-schedule.jpg,Choose schedules for Saturday and Sunday.,Select Weekends,/schedule_weekends
