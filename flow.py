@@ -265,6 +265,135 @@ def handle_gender(psid: str, payload: str) -> None:
         _ask_gender(psid)
 
 
+def handle_generation_old(psid: str, payload: str) -> None:
+    if payload == "gen_x":
+        state.update(psid, age_group="Gen X")
+    elif payload == "baby_boomers":
+        state.update(psid, age_group="Baby Boomers")
+    else:
+        facebook.send_buttons(
+            psid,
+            "Are you a Gen X (1965–1980) or Baby Boomer (1946–1964)?",
+            [
+                {"type": "postback", "title": "🧓 Gen X", "payload": "/gen_x"},
+                {"type": "postback", "title": "👴 Baby Boomers", "payload": "/baby_boomers"},
+            ],
+        )
+        return
+    facebook.send_buttons(
+        psid,
+        "Which life stage best describes your current situation?",
+        [
+            {"type": "postback", "title": "👤 Single", "payload": "/single"},
+            {"type": "postback", "title": "💍 Married", "payload": "/married"},
+            {"type": "postback", "title": "🕊️ Widowed", "payload": "/widowed"},
+        ],
+    )
+    state.update(psid, step="life_stage_old")
+
+
+def handle_life_stage_old(psid: str, payload: str) -> None:
+    mapping = {"single": "Single", "married": "Married", "widowed": "Widowed"}
+    if payload in mapping:
+        state.update(psid, marital_status=mapping[payload])
+        _ask_availability_group(psid)
+    else:
+        facebook.send_buttons(
+            psid,
+            "Which life stage best describes your current situation?",
+            [
+                {"type": "postback", "title": "👤 Single", "payload": "/single"},
+                {"type": "postback", "title": "💍 Married", "payload": "/married"},
+                {"type": "postback", "title": "🕊️ Widowed", "payload": "/widowed"},
+            ],
+        )
+
+
+def handle_availability_group(psid: str, payload: str) -> None:
+    if payload == "mwf":
+        facebook.send_buttons(
+            psid,
+            "Which day works for you between M-W-F?",
+            [
+                {"type": "postback", "title": "📅 Monday", "payload": "/monday"},
+                {"type": "postback", "title": "📅 Wednesday", "payload": "/wednesday"},
+                {"type": "postback", "title": "📅 Friday", "payload": "/friday"},
+            ],
+        )
+        state.update(psid, step="availability_mwf")
+    elif payload == "tth":
+        facebook.send_buttons(
+            psid,
+            "Which day works for you between Tuesday or Thursday?",
+            [
+                {"type": "postback", "title": "📅 Tuesday", "payload": "/tuesday"},
+                {"type": "postback", "title": "📅 Thursday", "payload": "/thursday"},
+            ],
+        )
+        state.update(psid, step="availability_tth")
+    elif payload == "weekend":
+        facebook.send_buttons(
+            psid,
+            "Which day works for you on the weekend?",
+            [
+                {"type": "postback", "title": "🌅 Saturday", "payload": "/saturday"},
+                {"type": "postback", "title": "⛪ Sunday", "payload": "/sunday"},
+            ],
+        )
+        state.update(psid, step="availability_weekend")
+    else:
+        _ask_availability_group(psid)
+
+
+def handle_availability_mwf(psid: str, payload: str) -> None:
+    day_map = {"monday": "Monday", "wednesday": "Wednesday", "friday": "Friday"}
+    if payload in day_map:
+        state.update(psid, availability_day=day_map[payload])
+        _ask_preferred_time(psid)
+    else:
+        facebook.send_buttons(
+            psid,
+            "Which day works for you between M-W-F?",
+            [
+                {"type": "postback", "title": "📅 Monday", "payload": "/monday"},
+                {"type": "postback", "title": "📅 Wednesday", "payload": "/wednesday"},
+                {"type": "postback", "title": "📅 Friday", "payload": "/friday"},
+            ],
+        )
+
+
+def handle_availability_tth(psid: str, payload: str) -> None:
+    day_map = {"tuesday": "Tuesday", "thursday": "Thursday"}
+    if payload in day_map:
+        state.update(psid, availability_day=day_map[payload])
+        _ask_preferred_time(psid)
+    else:
+        facebook.send_buttons(
+            psid,
+            "Which day works for you between Tuesday or Thursday?",
+            [
+                {"type": "postback", "title": "📅 Tuesday", "payload": "/tuesday"},
+                {"type": "postback", "title": "📅 Thursday", "payload": "/thursday"},
+            ],
+        )
+
+
+def handle_availability_weekend(psid: str, payload: str) -> None:
+    day_map = {"saturday": "Saturday", "sunday": "Sunday"}
+    if payload in day_map:
+        state.update(psid, availability_day=day_map[payload])
+        _ask_preferred_time(psid)
+    else:
+        facebook.send_buttons(
+            psid,
+            "Which day works for you on the weekend?",
+            [
+                {"type": "postback", "title": "🌅 Saturday", "payload": "/saturday"},
+                {"type": "postback", "title": "⛪ Sunday", "payload": "/sunday"},
+            ],
+        )
+
+
 # ── HANDLERS dict ────────────────────────────────────────────────────────────
 
 HANDLERS: dict[str, Callable[[str, str], None]] = {}
@@ -294,6 +423,12 @@ HANDLERS.update({
     "life_stage_young": handle_life_stage_young,
     "elevate_b1g": handle_elevate_b1g,
     "gender": handle_gender,
+    "generation_old": handle_generation_old,
+    "life_stage_old": handle_life_stage_old,
+    "availability_group": handle_availability_group,
+    "availability_mwf": handle_availability_mwf,
+    "availability_tth": handle_availability_tth,
+    "availability_weekend": handle_availability_weekend,
     # NOTE: "done" is intentionally omitted — any new message from a user in
     # the "done" step falls back to the default handle_start, restarting the flow.
     "handoff": handle_handoff,

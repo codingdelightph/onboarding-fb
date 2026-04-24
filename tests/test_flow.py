@@ -177,3 +177,104 @@ def test_unknown_gender_resends_gender_buttons(mocker):
     state.update(PSID, step="gender")
     flow.dispatch(PSID, "/something")
     assert state.get(PSID)["step"] == "gender"
+
+
+# ── generation_old ───────────────────────────────────────────────────────────
+
+def test_gen_x_sets_age_group_and_asks_life_stage(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="generation_old")
+    flow.dispatch(PSID, "/gen_x")
+    user = state.get(PSID)
+    assert user["age_group"] == "Gen X"
+    assert user["step"] == "life_stage_old"
+
+
+def test_baby_boomers_sets_age_group_and_asks_life_stage(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="generation_old")
+    flow.dispatch(PSID, "/baby_boomers")
+    user = state.get(PSID)
+    assert user["age_group"] == "Baby Boomers"
+    assert user["step"] == "life_stage_old"
+
+
+# ── life_stage_old ───────────────────────────────────────────────────────────
+
+def test_older_married_sets_marital_and_asks_day(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="life_stage_old", age_group="Gen X")
+    flow.dispatch(PSID, "/married")
+    user = state.get(PSID)
+    assert user["marital_status"] == "Married"
+    assert user["step"] == "availability_group"
+
+
+def test_older_single_sets_marital_and_asks_day(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="life_stage_old", age_group="Baby Boomers")
+    flow.dispatch(PSID, "/single")
+    user = state.get(PSID)
+    assert user["marital_status"] == "Single"
+    assert user["step"] == "availability_group"
+
+
+def test_older_widowed_sets_marital_and_asks_day(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="life_stage_old", age_group="Gen X")
+    flow.dispatch(PSID, "/widowed")
+    user = state.get(PSID)
+    assert user["marital_status"] == "Widowed"
+    assert user["step"] == "availability_group"
+
+
+# ── availability_group ───────────────────────────────────────────────────────
+
+def test_mwf_sends_mwf_day_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_group")
+    flow.dispatch(PSID, "/mwf")
+    assert state.get(PSID)["step"] == "availability_mwf"
+
+
+def test_tth_sends_tth_day_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_group")
+    flow.dispatch(PSID, "/tth")
+    assert state.get(PSID)["step"] == "availability_tth"
+
+
+def test_weekend_sends_weekend_day_buttons(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_group")
+    flow.dispatch(PSID, "/weekend")
+    assert state.get(PSID)["step"] == "availability_weekend"
+
+
+# ── availability_mwf / tth / weekend ────────────────────────────────────────
+
+def test_monday_sets_day_and_asks_time(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_mwf")
+    flow.dispatch(PSID, "/monday")
+    user = state.get(PSID)
+    assert user["availability_day"] == "Monday"
+    assert user["step"] == "preferred_time"
+
+
+def test_thursday_sets_day_and_asks_time(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_tth")
+    flow.dispatch(PSID, "/thursday")
+    user = state.get(PSID)
+    assert user["availability_day"] == "Thursday"
+    assert user["step"] == "preferred_time"
+
+
+def test_saturday_sets_day_and_asks_time(mocker):
+    mocker.patch("flow.facebook.send_buttons")
+    state.update(PSID, step="availability_weekend")
+    flow.dispatch(PSID, "/saturday")
+    user = state.get(PSID)
+    assert user["availability_day"] == "Saturday"
+    assert user["step"] == "preferred_time"
