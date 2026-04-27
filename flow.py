@@ -123,12 +123,6 @@ def handle_membership(psid: str, payload: str) -> None:
         handle_privacy(psid, "accept_privacy_policy")
 
 
-def handle_done(psid: str, payload: str) -> None:
-    # Not registered in HANDLERS — any new message after "done" falls back to
-    # the default handle_start, restarting the conversation from scratch.
-    pass
-
-
 def handle_handoff(psid: str, payload: str) -> None:
     facebook.send_message(psid, "Please wait while we connect you to someone who can help.")
     facebook.handoff_to_human(psid)
@@ -139,6 +133,8 @@ def handle_paused(psid: str, payload: str) -> None:
     if payload == "agent_resume":
         facebook.send_message(psid, "Welcome back! Let's continue where we left off.")
         state.update(psid, step="membership")
+    else:
+        facebook.send_message(psid, "Please wait — a team member will be with you shortly.")
 
 
 def handle_invite(psid: str, payload: str) -> None:
@@ -269,7 +265,7 @@ def handle_generation_old(psid: str, payload: str) -> None:
     if payload == "gen_x":
         state.update(psid, age_group="Gen X")
     elif payload == "baby_boomers":
-        state.update(psid, age_group="Baby Boomers")
+        state.update(psid, age_group="Baby Boomer")
     else:
         facebook.send_buttons(
             psid,
@@ -522,8 +518,6 @@ HANDLERS.update({
     "mobile_prompt": handle_mobile_prompt,
     "collect_mobile": handle_collect_mobile,
     "wind_down": handle_wind_down,
-    # NOTE: "done" is intentionally omitted — any new message from a user in
-    # the "done" step falls back to the default handle_start, restarting the flow.
-    "handoff": handle_handoff,
+    # "done" is intentionally omitted — any new message restarts the flow via handle_start.
     "paused": handle_paused,
 })

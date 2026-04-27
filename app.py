@@ -1,4 +1,6 @@
+import hashlib
 import hmac
+import json
 import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -6,8 +8,24 @@ import uvicorn
 from config import Config
 import flow
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 logger = logging.getLogger(__name__)
 app = FastAPI()
+
+
+def _verify_signature(body: bytes, signature_header: str) -> bool:
+    """Return True if X-Hub-Signature-256 matches HMAC-SHA256 of body."""
+    if not Config.APP_SECRET:
+        return True  # skip validation if APP_SECRET not configured
+    if not signature_header.startswith("sha256="):
+        return False
+    expected = hmac.new(
+        Config.APP_SECRET.encode(), body, hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(f"sha256={expected}", signature_header)
 
 
 @app.get("/webhook")
@@ -21,8 +39,14 @@ async def verify_webhook(request: Request) -> PlainTextResponse:
 
 @app.post("/webhook")
 async def webhook(request: Request):
+    body = await request.body()
+    signature = request.headers.get("X-Hub-Signature-256", "")
+    if not _verify_signature(body, signature):
+        logger.warning("Invalid webhook signature")
+        return JSONResponse({"status": "forbidden"}, status_code=403)
+
     try:
-        data = await request.json()
+        data = json.loads(body)
     except Exception:
         return JSONResponse({"status": "bad_request"}, status_code=400)
 
