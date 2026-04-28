@@ -29,13 +29,20 @@ def _verify_signature(body: bytes, signature_header: str) -> bool:
 
 
 @app.get("/webhook")
+@app.get("/webhook")
 async def verify_webhook(request: Request) -> PlainTextResponse:
     token = request.query_params.get("hub.verify_token", "")
     challenge = request.query_params.get("hub.challenge", "")
-    if hmac.compare_digest(token, Config.VERIFY_TOKEN):
+    
+    # Debug print (you can remove later)
+    print(f"Received verify_token: '{token}'")
+    print(f"Expected verify_token: '{Config.VERIFY_TOKEN}'")
+    
+    if token == Config.VERIFY_TOKEN:
         return PlainTextResponse(challenge)
+    
+    print("Verify token mismatch!")
     return PlainTextResponse("Forbidden", status_code=403)
-
 
 @app.post("/webhook")
 async def webhook(request: Request):
