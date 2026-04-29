@@ -10,8 +10,6 @@ import flow
 from fastapi.staticfiles import StaticFiles
 import os
 
-# Serve static files (privacy policy, etc.)
-app.mount("/static", StaticFiles(directory="."), name="static")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,6 +17,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 app = FastAPI()
+
+# Serve static files (privacy policy, etc.)
+app.mount("/static", StaticFiles(directory="."), name="static")
 
 
 def _verify_signature(body: bytes, signature_header: str) -> bool:
