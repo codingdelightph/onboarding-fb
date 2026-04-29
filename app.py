@@ -7,6 +7,11 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 import uvicorn
 from config import Config
 import flow
+from fastapi.staticfiles import StaticFiles
+import os
+
+# Serve static files (privacy policy, etc.)
+app.mount("/static", StaticFiles(directory="."), name="static")
 
 logging.basicConfig(
     level=logging.INFO,
