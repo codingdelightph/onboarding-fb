@@ -34,7 +34,6 @@ def _verify_signature(body: bytes, signature_header: str) -> bool:
 
 
 @app.get("/webhook")
-@app.get("/webhook")
 async def verify_webhook(request: Request) -> PlainTextResponse:
     token = request.query_params.get("hub.verify_token", "")
     challenge = request.query_params.get("hub.challenge", "")
