@@ -18,9 +18,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 app = FastAPI()
 
-# Serve static files (privacy policy, etc.)
-app.mount("/static", StaticFiles(directory="."), name="static")
-
+# Serve files from root directory (including privacy-policy.html)
+app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 def _verify_signature(body: bytes, signature_header: str) -> bool:
     """Return True if X-Hub-Signature-256 matches HMAC-SHA256 of body."""
