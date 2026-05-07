@@ -1,80 +1,379 @@
-PRIVACY POLICY
-Discipleship GroupOnboarding
-A Facebook Messenger experience that helps newcomers find a Christ's Commission Fellowship discipleship group. Your information is treated with care, used only to help match you, and never sold.
-Last updated: 7 May 2026
-Effective: 7 May 2026
-Version: 2.0
-About this policy
-This Privacy Policy explains how the Discipleship Group Onboarding chatbot ("the Bot," "we," "us," or "our") collects, uses, and protects information when you interact with it through Facebook Messenger on a Christ's Commission Fellowship (CCF) satellite Page.
-The Bot is operated by the local CCF satellite team to help people interested in joining a Discipleship Group ("D-Group") find one that matches their schedule and life stage. By messaging the Page or tapping Accept on the privacy prompt, you confirm you have read and agree to this policy.
-Information we collect
-We collect only what is necessary to match you with a suitable D-Group and follow up with you. Specifically:
-Provided by Facebook when you message us
-	•	Your Page-Scoped ID (PSID) — a unique identifier issued by Facebook that lets the Bot recognize you within this Page only.
-	•	Your first name and last name as shown on your Facebook profile, used to personalize replies (for example, "Welcome [Name]").
-Information you choose to share during the conversation
-	•	Whether you are already a D-Group member.
-	•	Age group (e.g., below 44, Gen X, Baby Boomer).
-	•	Life stage (e.g., student, young professional, married, solo parent, widowed).
-	•	Gender, when needed to match you with a same-gender group.
-	•	Preferred meeting day and time.
-	•	Mobile number — only if you explicitly tap "📱 Take my number!" and type it in. You may decline.
-What we do not collect
-	•	Your friends list, photos, posts, or any content from your Facebook profile beyond your name.
-	•	Your email address (unless you volunteer it in a free-text reply).
-	•	Payment information — the Bot does not process payments.
-	•	Location data from your device.
-How we use your information
-Your information is used solely for the following purposes:
-	•	Matching you with a D-Group whose age group, life stage, gender, and meeting schedule align with what you shared.
-	•	Personalizing the conversation by addressing you by name.
-	•	Follow-up by a CCF facilitator if a suitable group cannot be matched automatically, or if you ask to speak with a person.
-	•	Handover to a human agent in the Page Inbox using Meta's Handover Protocol when you tap "📞 Talk to a person."
-We do not use your information for advertising, profiling, automated decision-making with legal effects, or any purpose unrelated to D-Group onboarding.
-Lawful basis for processing
-For users in jurisdictions where this applies (such as the EU/UK under GDPR), our lawful bases are:
-	•	Consent — you tap "✅ Accept" before any onboarding questions are asked, and again before sharing your mobile number.
-	•	Legitimate interest — the CCF satellite has a legitimate interest in connecting interested newcomers with appropriate small groups, balanced against your privacy.
-Sharing and disclosure
-We do not sell, rent, or trade your personal information. We share information only in these limited cases:
-	•	With CCF facilitators at your local satellite, who use it to assign you to a D-Group and to contact you for follow-up.
-	•	With Meta Platforms, Inc. as an unavoidable consequence of using Facebook Messenger; messages between you and the Page are processed and stored by Meta under Meta's Privacy Policy.
-	•	With our hosting provider (the cloud platform that runs the Bot's server), strictly for the technical operation of the service. The provider does not access your data for its own purposes.
-	•	Where required by law, such as in response to a valid legal request from authorities in the Philippines or another applicable jurisdiction.
-Your data stays within the CCF community. No marketing partners. No data brokers. No analytics platforms profiling you.
-Data retention
-We retain your information only as long as it serves the purpose for which it was collected:
-	•	Conversation state (your in-progress answers) is kept until you complete the flow or until 30 days of inactivity, whichever comes first, after which it is automatically purged.
-	•	Matched-group records (name, age group, life stage, schedule, mobile number if shared) are retained by the CCF satellite for as long as you remain an active D-Group prospect or member, and deleted within 12 months of your last interaction if you do not join.
-	•	Mobile numbers are deleted on request at any time.
-Your rights
-Regardless of where you live, you can exercise the following rights at any time:
-	•	Access — request a copy of the information we hold about you.
-	•	Correction — ask us to fix anything that is inaccurate or out of date.
-	•	Deletion — ask us to erase your information from our records. We will honor this within 30 days unless we are legally required to retain it.
-	•	Withdrawal of consent — stop the conversation at any point or message the word "delete my data" to the Page.
-	•	Objection and restriction — limit how we use your information.
-	•	Complaint — lodge a complaint with the National Privacy Commission of the Philippines (privacy.gov.ph) or your local data-protection authority.
-To exercise any of these rights, see the Contact section below.
-Security
-We protect your information using industry-standard measures:
-	•	All communication between the Bot and Meta uses HTTPS/TLS encryption.
-	•	Access to stored data is limited to authorized CCF facilitators and the Bot's developer.
-	•	Access tokens are stored as environment variables, never in source code or public repositories.
-	•	The Bot's source code is open and auditable at github.com/codingdelightph/onboarding-fb.
-No system is perfectly secure. If a breach occurs, we will notify affected users within 72 hours of becoming aware, in line with applicable law.
-Children's privacy
-The Bot is not directed at children under 13 (or the equivalent minimum age in your jurisdiction). We do not knowingly collect information from children. If you believe a child has interacted with the Bot, please contact us so we can delete the information.
-International users
-The Bot is operated from the Philippines. If you interact with it from outside the Philippines, your information will be processed in the Philippines and, through Meta, in the regions where Meta operates its messaging infrastructure. By using the Bot you consent to this transfer.
-Changes to this policy
-We may update this policy as the Bot evolves or as legal requirements change. The Last updated date at the top reflects the most recent revision. Material changes will be communicated through the Bot before they take effect, and your continued use after that point indicates acceptance of the revised policy.
-Contact us
-For privacy questions, data requests, or to delete your information, reach us at any of the following:
-EMAIL
-codingdelightph@gmail.com
-THROUGH THE BOT
-Send the message "delete my data" to the connected CCF Page on Messenger.
-SOURCE CODE & ISSUES
-github.com/codingdelightph/onboarding-fb
-© 2026 Discipleship Group Onboarding · Operated by a Christ's Commission Fellowship satellite team
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Discipleship Group Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --ink-muted: #7a7a7a;
+    --paper: #fbfaf6;
+    --paper-soft: #f3f1ea;
+    --accent: #6b4423;
+    --rule: #e3dfd2;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 80px 32px 120px;
+  }
+
+  header {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 40px;
+    margin-bottom: 56px;
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(40px, 6vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0 0 24px;
+    color: var(--ink);
+  }
+
+  .lede {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 0 24px;
+    max-width: 56ch;
+  }
+
+  .meta {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+
+  .meta strong {
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 56px 0 16px;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  h2::before {
+    content: counter(section, decimal-leading-zero);
+    counter-increment: section;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+    padding-top: 6px;
+  }
+
+  body { counter-reset: section; }
+
+  h3 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    margin: 28px 0 8px;
+    color: var(--ink);
+  }
+
+  p {
+    margin: 0 0 16px;
+    color: var(--ink-soft);
+  }
+
+  ul {
+    padding-left: 0;
+    list-style: none;
+    margin: 0 0 16px;
+  }
+
+  ul li {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 10px;
+    color: var(--ink-soft);
+  }
+
+  ul li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: opacity 0.2s;
+  }
+
+  a:hover {
+    opacity: 0.7;
+  }
+
+  .callout {
+    background: var(--paper-soft);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    margin: 28px 0;
+    border-radius: 2px;
+  }
+
+  .callout p:last-child {
+    margin-bottom: 0;
+  }
+
+  .contact-card {
+    margin-top: 64px;
+    padding: 32px;
+    background: var(--paper-soft);
+    border-radius: 6px;
+  }
+
+  .contact-card h2 {
+    margin-top: 0;
+  }
+
+  .contact-card .label {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .contact-card .value {
+    color: var(--ink);
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
+    color: var(--ink-muted);
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 56px 24px 80px; }
+    h2 { flex-direction: column; gap: 6px; }
+    h2::before { padding-top: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Privacy Policy</div>
+  <h1>Discipleship Group<br>Onboarding</h1>
+  <p class="lede">A Facebook Messenger experience that helps newcomers find a Christ's Commission Fellowship discipleship group. Your information is treated with care, used only to help match you, and never sold.</p>
+  <div class="meta">
+    <span><strong>Last updated:</strong> 7 May 2026</span>
+    <span><strong>Effective:</strong> 7 May 2026</span>
+    <span><strong>Version:</strong> 2.0</span>
+  </div>
+</header>
+
+<section>
+  <h2>About this policy</h2>
+  <p>This Privacy Policy explains how the <strong>Discipleship Group Onboarding</strong> chatbot ("the Bot," "we," "us," or "our") collects, uses, and protects information when you interact with it through Facebook Messenger on a Christ's Commission Fellowship (CCF) satellite Page.</p>
+  <p>The Bot is operated by the local CCF satellite team to help people interested in joining a Discipleship Group ("D-Group") find one that matches their schedule and life stage. By messaging the Page or tapping <strong>Accept</strong> on the privacy prompt, you confirm you have read and agree to this policy.</p>
+</section>
+
+<section>
+  <h2>Information we collect</h2>
+  <p>We collect only what is necessary to match you with a suitable D-Group and follow up with you. Specifically:</p>
+
+  <h3>Provided by Facebook when you message us</h3>
+  <ul>
+    <li>Your <strong>Page-Scoped ID</strong> (PSID) — a unique identifier issued by Facebook that lets the Bot recognize you within this Page only.</li>
+    <li>Your <strong>first name and last name</strong> as shown on your Facebook profile, used to personalize replies (for example, "Welcome [Name]").</li>
+  </ul>
+
+  <h3>Information you choose to share during the conversation</h3>
+  <ul>
+    <li>Whether you are already a D-Group member.</li>
+    <li>Age group (e.g., below 44, Gen X, Baby Boomer).</li>
+    <li>Life stage (e.g., student, young professional, married, solo parent, widowed).</li>
+    <li>Gender, when needed to match you with a same-gender group.</li>
+    <li>Preferred meeting day and time.</li>
+    <li>Mobile number — only if you explicitly tap "📱 Take my number!" and type it in. You may decline.</li>
+  </ul>
+
+  <h3>What we do <em>not</em> collect</h3>
+  <ul>
+    <li>Your friends list, photos, posts, or any content from your Facebook profile beyond your name.</li>
+    <li>Your email address (unless you volunteer it in a free-text reply).</li>
+    <li>Payment information — the Bot does not process payments.</li>
+    <li>Location data from your device.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>How we use your information</h2>
+  <p>Your information is used solely for the following purposes:</p>
+  <ul>
+    <li><strong>Matching</strong> you with a D-Group whose age group, life stage, gender, and meeting schedule align with what you shared.</li>
+    <li><strong>Personalizing</strong> the conversation by addressing you by name.</li>
+    <li><strong>Follow-up</strong> by a CCF facilitator if a suitable group cannot be matched automatically, or if you ask to speak with a person.</li>
+    <li><strong>Handover</strong> to a human agent in the Page Inbox using Meta's Handover Protocol when you tap "📞 Talk to a person."</li>
+  </ul>
+  <p>We do not use your information for advertising, profiling, automated decision-making with legal effects, or any purpose unrelated to D-Group onboarding.</p>
+</section>
+
+<section>
+  <h2>Lawful basis for processing</h2>
+  <p>For users in jurisdictions where this applies (such as the EU/UK under GDPR), our lawful bases are:</p>
+  <ul>
+    <li><strong>Consent</strong> — you tap "✅ Accept" before any onboarding questions are asked, and again before sharing your mobile number.</li>
+    <li><strong>Legitimate interest</strong> — the CCF satellite has a legitimate interest in connecting interested newcomers with appropriate small groups, balanced against your privacy.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Sharing and disclosure</h2>
+  <p>We do not sell, rent, or trade your personal information. We share information only in these limited cases:</p>
+  <ul>
+    <li><strong>With CCF facilitators</strong> at your local satellite, who use it to assign you to a D-Group and to contact you for follow-up.</li>
+    <li><strong>With Meta Platforms, Inc.</strong> as an unavoidable consequence of using Facebook Messenger; messages between you and the Page are processed and stored by Meta under <a href="https://www.facebook.com/policy.php" target="_blank" rel="noopener">Meta's Privacy Policy</a>.</li>
+    <li><strong>With our hosting provider</strong> (the cloud platform that runs the Bot's server), strictly for the technical operation of the service. The provider does not access your data for its own purposes.</li>
+    <li><strong>Where required by law</strong>, such as in response to a valid legal request from authorities in the Philippines or another applicable jurisdiction.</li>
+  </ul>
+  <div class="callout">
+    <p><strong>Your data stays within the CCF community.</strong> No marketing partners. No data brokers. No analytics platforms profiling you.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Data retention</h2>
+  <p>We retain your information only as long as it serves the purpose for which it was collected:</p>
+  <ul>
+    <li><strong>Conversation state</strong> (your in-progress answers) is kept until you complete the flow or until <strong>30 days</strong> of inactivity, whichever comes first, after which it is automatically purged.</li>
+    <li><strong>Matched-group records</strong> (name, age group, life stage, schedule, mobile number if shared) are retained by the CCF satellite for as long as you remain an active D-Group prospect or member, and deleted within <strong>12 months</strong> of your last interaction if you do not join.</li>
+    <li><strong>Mobile numbers</strong> are deleted on request at any time.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Your rights</h2>
+  <p>Regardless of where you live, you can exercise the following rights at any time:</p>
+  <ul>
+    <li><strong>Access</strong> — request a copy of the information we hold about you.</li>
+    <li><strong>Correction</strong> — ask us to fix anything that is inaccurate or out of date.</li>
+    <li><strong>Deletion</strong> — ask us to erase your information from our records. We will honor this within 30 days unless we are legally required to retain it.</li>
+    <li><strong>Withdrawal of consent</strong> — stop the conversation at any point or message the word <em>"delete my data"</em> to the Page.</li>
+    <li><strong>Objection and restriction</strong> — limit how we use your information.</li>
+    <li><strong>Complaint</strong> — lodge a complaint with the National Privacy Commission of the Philippines (<a href="https://privacy.gov.ph" target="_blank" rel="noopener">privacy.gov.ph</a>) or your local data-protection authority.</li>
+  </ul>
+  <p>To exercise any of these rights, see the <a href="#contact">Contact</a> section below.</p>
+</section>
+
+<section>
+  <h2>Security</h2>
+  <p>We protect your information using industry-standard measures:</p>
+  <ul>
+    <li>All communication between the Bot and Meta uses HTTPS/TLS encryption.</li>
+    <li>Access to stored data is limited to authorized CCF facilitators and the Bot's developer.</li>
+    <li>Access tokens are stored as environment variables, never in source code or public repositories.</li>
+    <li>The Bot's source code is open and auditable at <a href="https://github.com/codingdelightph/onboarding-fb" target="_blank" rel="noopener">github.com/codingdelightph/onboarding-fb</a>.</li>
+  </ul>
+  <p>No system is perfectly secure. If a breach occurs, we will notify affected users within 72 hours of becoming aware, in line with applicable law.</p>
+</section>
+
+<section>
+  <h2>Children's privacy</h2>
+  <p>The Bot is not directed at children under 13 (or the equivalent minimum age in your jurisdiction). We do not knowingly collect information from children. If you believe a child has interacted with the Bot, please contact us so we can delete the information.</p>
+</section>
+
+<section>
+  <h2>International users</h2>
+  <p>The Bot is operated from the Philippines. If you interact with it from outside the Philippines, your information will be processed in the Philippines and, through Meta, in the regions where Meta operates its messaging infrastructure. By using the Bot you consent to this transfer.</p>
+</section>
+
+<section>
+  <h2>Changes to this policy</h2>
+  <p>We may update this policy as the Bot evolves or as legal requirements change. The <strong>Last updated</strong> date at the top reflects the most recent revision. Material changes will be communicated through the Bot before they take effect, and your continued use after that point indicates acceptance of the revised policy.</p>
+</section>
+
+<section id="contact" class="contact-card">
+  <h2>Contact us</h2>
+  <p>For privacy questions, data requests, or to delete your information, reach us at any of the following:</p>
+
+  <div class="label">Email</div>
+  <div class="value"><a href="mailto:codingdelightph@gmail.com">codingdelightph@gmail.com</a></div>
+
+  <div class="label">Through the Bot</div>
+  <div class="value">Send the message <em>"delete my data"</em> to the connected CCF Page on Messenger.</div>
+
+  <div class="label">Source code &amp; issues</div>
+  <div class="value"><a href="https://github.com/codingdelightph/onboarding-fb" target="_blank" rel="noopener">github.com/codingdelightph/onboarding-fb</a></div>
+</section>
+
+<footer>
+  © 2026 Discipleship Group Onboarding · Operated by a Christ's Commission Fellowship satellite team
+</footer>
+
+</div>
+</body>
+</html>
