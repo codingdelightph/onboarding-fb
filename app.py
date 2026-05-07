@@ -2,24 +2,22 @@ import hashlib
 import hmac
 import json
 import logging
+
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, FileResponse
 import uvicorn
+
 from config import Config
 import flow
-from fastapi.staticfiles import StaticFiles
-import os
-
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 logger = logging.getLogger(__name__)
+
 app = FastAPI()
 
-# Serve files from root directory (including privacy-policy.html)
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
 def _verify_signature(body: bytes, signature_header: str) -> bool:
     """Return True if X-Hub-Signature-256 matches HMAC-SHA256 of body."""
@@ -37,16 +35,13 @@ def _verify_signature(body: bytes, signature_header: str) -> bool:
 async def verify_webhook(request: Request) -> PlainTextResponse:
     token = request.query_params.get("hub.verify_token", "")
     challenge = request.query_params.get("hub.challenge", "")
-    
-    # Debug print (you can remove later)
     print(f"Received verify_token: '{token}'")
     print(f"Expected verify_token: '{Config.VERIFY_TOKEN}'")
-    
     if token == Config.VERIFY_TOKEN:
         return PlainTextResponse(challenge)
-    
     print("Verify token mismatch!")
     return PlainTextResponse("Forbidden", status_code=403)
+
 
 @app.post("/webhook")
 async def webhook(request: Request):
@@ -69,7 +64,6 @@ async def webhook(request: Request):
             psid: str = messaging.get("sender", {}).get("id", "")
             if not psid:
                 continue
-
             try:
                 # Agent resume: human inbox returning control to bot
                 if "pass_thread_control" in messaging:
@@ -77,7 +71,10 @@ async def webhook(request: Request):
                     if prev_app == Config.PAGE_INBOX_APP_ID:
                         flow.dispatch(psid, "agent_resume")
                     else:
-                        logger.warning("Unexpected pass_thread_control from app_id=%s for psid=%s", prev_app, psid)
+                        logger.warning(
+                            "Unexpected pass_thread_control from app_id=%s for psid=%s",
+                            prev_app, psid,
+                        )
                     continue
 
                 # Postback button tap
@@ -91,11 +88,26 @@ async def webhook(request: Request):
                 text = message.get("text", "")
                 if text:
                     flow.dispatch(psid, text)
-
             except Exception as exc:
                 logger.exception("Error handling message for psid=%s: %s", psid, exc)
-
     return {"status": "ok"}
+
+
+# Health check at root so Railway's health probe and quick browser tests succeed
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "onboarding-fb"}
+
+
+# Serve the privacy policy at a clean public URL
+@app.get("/privacy-policy.html")
+async def privacy_policy():
+    return FileResponse("privacy-policy.html", media_type="text/html")
+
+
+@app.get("/privacy-policy")
+async def privacy_policy_alias():
+    return FileResponse("privacy-policy.html", media_type="text/html")
 
 
 if __name__ == "__main__":
