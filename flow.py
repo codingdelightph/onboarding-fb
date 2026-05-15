@@ -464,19 +464,36 @@ def handle_collect_mobile(psid: str, payload: str) -> None:
         facebook.send_message(psid, "Please send a valid PH mobile number (e.g. 09171234567).")
 
 
+# flow.py — replace the existing handle_wind_down with this:
+
 def handle_wind_down(psid: str, payload: str) -> None:
     if payload == "get_started":
-        state.reset(psid)
-        handle_start(psid, payload)
+        # User confirmed they want to be placed in the matched D-Group.
+        # Send a confirmation, hand off so a facilitator can follow up, end the flow.
+        user = state.get(psid)
+        first_name = user.get("first_name", "")
+        facebook.send_message(
+            psid,
+            (
+                f"You're all set{', ' + first_name if first_name else ''}! 🎉\n"
+                "A CCF facilitator will reach out shortly to confirm your D-Group placement.\n"
+                "Thanks for taking the first step. God bless! 🙏"
+            ),
+        )
+        facebook.handoff_to_human(psid)
+        state.update(psid, step="paused")
     elif payload == "revert_seeker":
         facebook.send_message(
             psid,
             "No problem! Take your time. We'll be here when you're ready. God bless! 🙏",
         )
         state.update(psid, step="done")
-    else:
+    elif payload == "wind_down":
         facebook.send_message(psid, "Thank you! God bless! 🙏")
         state.update(psid, step="done")
+    else:
+        # Unknown payload at wind_down — re-show the three options.
+        _show_wind_down(psid)
 
 
 # ── HANDLERS dict ────────────────────────────────────────────────────────────
