@@ -189,6 +189,50 @@ All tests use mocked Facebook API calls — no real network requests are made.
 
 ---
 
+## CI/CD — Automated Deploy Workflow
+
+Releases are tag-triggered via `.github/workflows/deploy.yml`. Pushing a `v*` tag to `main` automatically:
+
+1. Verifies the tag is on `main` (rejects tags on other branches)
+2. Builds a changelog from commits since the previous tag
+3. Creates a GitHub Release with the changelog
+4. Deploys to Railway via the CLI
+
+### One-time GitHub repo setup
+
+**Secrets** (Settings → Secrets and variables → Actions → Secrets):
+
+| Name | Value |
+|---|---|
+| `RAILWAY_TOKEN` | Railway API token — Account Settings → Tokens → New Token |
+
+**Variables** (Settings → Secrets and variables → Actions → Variables):
+
+| Name | Value |
+|---|---|
+| `RAILWAY_SERVICE` | Service name as shown in Railway dashboard |
+| `RAILWAY_ENVIRONMENT` | Environment name as shown in Railway dashboard (e.g. `production`) |
+
+**GitHub Environment** (Settings → Environments → New environment):
+- Name it `production`
+- Optionally add required reviewers for a manual approval gate before each deploy
+- Delete the `environment: production` line from the workflow if you don't want gating
+
+### Cutting a release
+
+```bash
+git tag -a v1.0.0 -m "release: short description"
+git push origin v1.0.0
+```
+
+Watch the run at **Actions → Tag-triggered production deploy** and the deployment at **Railway → Deployments tab**.
+
+### PAGE_ACCESS_TOKEN expiry
+
+If the bot stops sending replies with a `OAuthException code 190` error, the Page Access Token has been invalidated by Facebook. Generate a new one at **Meta for Developers → App → Messenger → Settings → Generate Token** and update `PAGE_ACCESS_TOKEN` in Railway's Variables tab.
+
+---
+
 ## Facebook App Setup Checklist
 
 - [ ] Create a Meta App at [developers.facebook.com](https://developers.facebook.com)
