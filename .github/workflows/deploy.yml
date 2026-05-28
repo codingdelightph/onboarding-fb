@@ -74,8 +74,8 @@ jobs:
           TAG="${{ github.ref_name }}"
           PREV=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || git rev-list --max-parents=0 "$TAG")
           PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
-          git log --pretty=format:"- %s (%h)" "${PREV}..${TAG}" > changelog.txt
-          [ -n "$PREV_TAG" ] && printf "\n\n**Full diff:** https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG}\n" >> changelog.txt
+          git log --pretty=format:"- %s (%h)" "${PREV}..${TAG}" > changelog.txt || true
+          [ -n "$PREV_TAG" ] && printf "\n\n**Full diff:** https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG}\n" >> changelog.txt || true
 
       - name: Create GitHub Release
         env:
