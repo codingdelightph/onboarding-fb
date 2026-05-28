@@ -22,7 +22,8 @@ app = FastAPI()
 def _verify_signature(body: bytes, signature_header: str) -> bool:
     """Return True if X-Hub-Signature-256 matches HMAC-SHA256 of body."""
     if not Config.APP_SECRET:
-        return True  # skip validation if APP_SECRET not configured
+        logger.error("APP_SECRET is not set — rejecting all webhook requests to prevent forged-request bypass")
+        return False
     if not signature_header.startswith("sha256="):
         return False
     expected = hmac.new(
@@ -35,11 +36,9 @@ def _verify_signature(body: bytes, signature_header: str) -> bool:
 async def verify_webhook(request: Request) -> PlainTextResponse:
     token = request.query_params.get("hub.verify_token", "")
     challenge = request.query_params.get("hub.challenge", "")
-    print(f"Received verify_token: '{token}'")
-    print(f"Expected verify_token: '{Config.VERIFY_TOKEN}'")
     if token == Config.VERIFY_TOKEN:
         return PlainTextResponse(challenge)
-    print("Verify token mismatch!")
+    logger.warning("Webhook verify_token mismatch")
     return PlainTextResponse("Forbidden", status_code=403)
 
 
