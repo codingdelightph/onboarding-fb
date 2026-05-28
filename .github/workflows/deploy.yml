@@ -1,0 +1,101 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# MANUAL SETUP REQUIRED — this workflow will not run correctly until you do:
+#
+#   1. RAILWAY_TOKEN secret
+#      Repo → Settings → Secrets and variables → Actions → Secrets tab
+#      → New repository secret
+#      Name : RAILWAY_TOKEN
+#      Value: your Railway API token
+#              (railway.app → Account Settings → Tokens → New Token)
+#
+#   2. RAILWAY_SERVICE and RAILWAY_ENVIRONMENT variables
+#      Repo → Settings → Secrets and variables → Actions → Variables tab
+#      → New repository variable (repeat for each)
+#      Name : RAILWAY_SERVICE        Value: service name from Railway dashboard
+#      Name : RAILWAY_ENVIRONMENT    Value: environment name (e.g. selfless-perfection)
+#
+#   3. GitHub Environment (optional approval gate)
+#      Repo → Settings → Environments → New environment → name it "production"
+#      Add required reviewers there to require a manual approval before deploy.
+#      If you do NOT want an approval gate, delete the `environment: production`
+#      line from the release-and-deploy job below.
+#
+#   4. Cut the first tag to trigger a deploy:
+#         git tag v0.1.0 && git push origin v0.1.0
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: Tag-triggered production deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Prevent two tag deploys from racing onto production.
+# cancel-in-progress: false ensures an in-flight deploy is never interrupted.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # required for gh release create
+
+jobs:
+  release-and-deploy:
+    runs-on: ubuntu-latest
+
+    # Requires creating a 'production' environment in repo settings (see setup
+    # note 3 above). Without protection rules configured there, the job runs
+    # immediately. Add required reviewers to the environment for an approval gate.
+    # Delete this line entirely if you don't want environment gating at all.
+    environment: production
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # required for git describe, git log range, ancestry check
+
+      - name: Verify tag is on main
+        run: |
+          TAG="${{ github.ref_name }}"
+          PROD_BRANCH="main"
+          TAG_COMMIT=$(git rev-list -n 1 "$TAG")
+          PROD_HEAD=$(git rev-parse "origin/${PROD_BRANCH}")
+          if ! git merge-base --is-ancestor "$TAG_COMMIT" "$PROD_HEAD"; then
+            echo "ERROR: Tag ${TAG} (${TAG_COMMIT}) is not an ancestor of ${PROD_BRANCH} (${PROD_HEAD})."
+            echo "Only tag commits that exist on the ${PROD_BRANCH} branch."
+            exit 1
+          fi
+          echo "Verified: ${TAG} is on ${PROD_BRANCH}."
+
+      - name: Build changelog
+        run: |
+          TAG="${{ github.ref_name }}"
+          PREV=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || git rev-list --max-parents=0 "$TAG")
+          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          git log --pretty=format:"- %s (%h)" "${PREV}..${TAG}" > changelog.txt
+          [ -n "$PREV_TAG" ] && printf "\n\n**Full diff:** https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG}\n" >> changelog.txt
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --verify-tag \
+            --title "${{ github.ref_name }}" \
+            --notes-file changelog.txt
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          # Not a monorepo — service root is the repo root.
+          # Build directory is whatever Railway's dashboard has configured; no cd needed.
+          railway up \
+            --service "${{ vars.RAILWAY_SERVICE }}" \
+            --environment "${{ vars.RAILWAY_ENVIRONMENT }}" \
+            --detach
