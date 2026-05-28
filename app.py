@@ -34,6 +34,9 @@ def _verify_signature(body: bytes, signature_header: str) -> bool:
 
 @app.get("/webhook")
 async def verify_webhook(request: Request) -> PlainTextResponse:
+    if not Config.VERIFY_TOKEN:
+        logger.error("VERIFY_TOKEN is not set — rejecting all webhook verification requests")
+        return PlainTextResponse("Forbidden", status_code=403)
     token = request.query_params.get("hub.verify_token", "")
     challenge = request.query_params.get("hub.challenge", "")
     if token == Config.VERIFY_TOKEN:

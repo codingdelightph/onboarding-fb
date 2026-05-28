@@ -18,6 +18,13 @@ def bypass_sig(mocker):
     mocker.patch("app._verify_signature", return_value=True)
 
 
+def test_webhook_verify_missing_token_returns_403(client):
+    params = {"hub.mode": "subscribe", "hub.verify_token": "", "hub.challenge": "abc123"}
+    with patch("app.Config.VERIFY_TOKEN", ""):
+        response = client.get("/webhook", params=params)
+    assert response.status_code == 403
+
+
 def test_webhook_verify_returns_challenge(client):
     params = {
         "hub.mode": "subscribe",
