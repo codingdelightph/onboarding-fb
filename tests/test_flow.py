@@ -195,7 +195,7 @@ def test_baby_boomers_sets_age_group_and_asks_life_stage(mocker):
     state.update(PSID, step="generation_old")
     flow.dispatch(PSID, "/baby_boomers")
     user = state.get(PSID)
-    assert user["age_group"] == "Baby Boomers"
+    assert user["age_group"] == "Baby Boomer"
     assert user["step"] == "life_stage_old"
 
 
@@ -446,6 +446,23 @@ def test_wind_down_revert_seeker_sends_followup(mocker):
     flow.dispatch(PSID, "/revert_seeker")
     assert state.get(PSID)["step"] == "done"
     flow.facebook.send_message.assert_called_once()
+
+
+def test_paused_agent_resume_resumes_to_membership(mocker):
+    mocker.patch("flow.facebook.send_message")
+    state.update(PSID, step="paused")
+    flow.dispatch(PSID, "agent_resume")
+    assert state.get(PSID)["step"] == "membership"
+
+
+def test_paused_user_message_sends_wait_notice(mocker):
+    mocker.patch("flow.facebook.send_message")
+    state.update(PSID, step="paused")
+    flow.dispatch(PSID, "hello")
+    assert state.get(PSID)["step"] == "paused"
+    flow.facebook.send_message.assert_called_once_with(
+        PSID, "Please wait — a team member will be with you shortly."
+    )
 
 
 def test_invalid_preferred_time_resends_time_buttons(mocker):

@@ -1,3 +1,6 @@
+import hashlib
+import hmac
+import json
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch
@@ -121,3 +124,32 @@ def test_webhook_post_message_without_text_does_not_dispatch(client, mocker):
 def test_webhook_post_bad_json_returns_400(client):
     response = client.post("/webhook", content=b"not json", headers={"Content-Type": "application/json"})
     assert response.status_code == 400
+
+
+def test_webhook_post_valid_signature_accepted(client, mocker):
+    mocker.patch("app.flow.dispatch")
+    secret = "test_secret"
+    body = json.dumps({
+        "object": "page",
+        "entry": [{"messaging": [{"sender": {"id": "p1"}, "message": {"text": "hi"}}]}],
+    }).encode()
+    sig = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+    with patch("app.Config.APP_SECRET", secret):
+        response = client.post(
+            "/webhook",
+            content=body,
+            headers={"Content-Type": "application/json", "X-Hub-Signature-256": sig},
+        )
+    assert response.status_code == 200
+
+
+def test_webhook_post_invalid_signature_returns_403(client):
+    secret = "test_secret"
+    body = json.dumps({"object": "page", "entry": []}).encode()
+    with patch("app.Config.APP_SECRET", secret):
+        response = client.post(
+            "/webhook",
+            content=body,
+            headers={"Content-Type": "application/json", "X-Hub-Signature-256": "sha256=bad"},
+        )
+    assert response.status_code == 403

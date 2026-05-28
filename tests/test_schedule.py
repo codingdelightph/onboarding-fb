@@ -52,3 +52,22 @@ def test_find_case_insensitive():
         preferred_time="afternoon",
     )
     assert "John Doe" in result
+
+
+def test_baby_boomer_age_group_matches_csv_spelling():
+    """Regression: flow.py must store 'Baby Boomer' (singular) to match CSV."""
+    result = schedule.find_schedule(
+        age_group="Baby Boomer",
+        marital_status="Married",
+        day="Monday",
+        preferred_time="evening",
+    )
+    assert result != "", "Baby Boomer (singular) must resolve to a schedule"
+    # Plural form must NOT match
+    result_plural = schedule.find_schedule(
+        age_group="Baby Boomers",
+        marital_status="Married",
+        day="Monday",
+        preferred_time="evening",
+    )
+    assert result_plural == "", "Baby Boomers (plural) should not match any CSV row"
