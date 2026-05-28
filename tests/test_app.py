@@ -12,6 +12,12 @@ def client():
     return TestClient(app)
 
 
+@pytest.fixture
+def bypass_sig(mocker):
+    """Patch _verify_signature to True for tests that aren't testing signature logic."""
+    mocker.patch("app._verify_signature", return_value=True)
+
+
 def test_webhook_verify_returns_challenge(client):
     params = {
         "hub.mode": "subscribe",
@@ -35,7 +41,7 @@ def test_webhook_verify_wrong_token_returns_403(client):
     assert response.status_code == 403
 
 
-def test_webhook_post_text_message_calls_dispatch(client, mocker):
+def test_webhook_post_text_message_calls_dispatch(client, mocker, bypass_sig):
     mock_dispatch = mocker.patch("app.flow.dispatch")
     payload = {
         "object": "page",
@@ -51,7 +57,7 @@ def test_webhook_post_text_message_calls_dispatch(client, mocker):
     mock_dispatch.assert_called_once_with("psid_123", "hello")
 
 
-def test_webhook_post_postback_calls_dispatch(client, mocker):
+def test_webhook_post_postback_calls_dispatch(client, mocker, bypass_sig):
     mock_dispatch = mocker.patch("app.flow.dispatch")
     payload = {
         "object": "page",
@@ -67,7 +73,7 @@ def test_webhook_post_postback_calls_dispatch(client, mocker):
     mock_dispatch.assert_called_once_with("psid_456", "/accept_privacy_policy")
 
 
-def test_webhook_post_agent_resume_calls_dispatch(client, mocker):
+def test_webhook_post_agent_resume_calls_dispatch(client, mocker, bypass_sig):
     mock_dispatch = mocker.patch("app.flow.dispatch")
     payload = {
         "object": "page",
@@ -85,7 +91,7 @@ def test_webhook_post_agent_resume_calls_dispatch(client, mocker):
     mock_dispatch.assert_called_once_with("psid_789", "agent_resume")
 
 
-def test_webhook_post_non_page_object_ignored(client, mocker):
+def test_webhook_post_non_page_object_ignored(client, mocker, bypass_sig):
     mock_dispatch = mocker.patch("app.flow.dispatch")
     payload = {"object": "user", "entry": []}
     response = client.post("/webhook", json=payload)
@@ -93,7 +99,7 @@ def test_webhook_post_non_page_object_ignored(client, mocker):
     mock_dispatch.assert_not_called()
 
 
-def test_webhook_post_wrong_app_id_does_not_dispatch(client, mocker):
+def test_webhook_post_wrong_app_id_does_not_dispatch(client, mocker, bypass_sig):
     mock_dispatch = mocker.patch("app.flow.dispatch")
     payload = {
         "object": "page",
@@ -107,7 +113,7 @@ def test_webhook_post_wrong_app_id_does_not_dispatch(client, mocker):
     mock_dispatch.assert_not_called()
 
 
-def test_webhook_post_message_without_text_does_not_dispatch(client, mocker):
+def test_webhook_post_message_without_text_does_not_dispatch(client, mocker, bypass_sig):
     mock_dispatch = mocker.patch("app.flow.dispatch")
     payload = {
         "object": "page",
@@ -121,7 +127,7 @@ def test_webhook_post_message_without_text_does_not_dispatch(client, mocker):
     mock_dispatch.assert_not_called()
 
 
-def test_webhook_post_bad_json_returns_400(client):
+def test_webhook_post_bad_json_returns_400(client, bypass_sig):
     response = client.post("/webhook", content=b"not json", headers={"Content-Type": "application/json"})
     assert response.status_code == 400
 

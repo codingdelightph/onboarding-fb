@@ -423,13 +423,13 @@ def test_invalid_mobile_sends_error_and_stays(mocker):
 
 # ── wind_down ─────────────────────────────────────────────────────────────────
 
-def test_wind_down_get_started_resets_and_sends_privacy(mocker):
-    mocker.patch("flow.facebook.send_buttons")
+def test_wind_down_get_started_confirms_and_hands_off(mocker):
+    mocker.patch("flow.facebook.send_message")
+    mocker.patch("flow.facebook.handoff_to_human")
     state.update(PSID, step="wind_down", first_name="Juan", mobile_number="09171234567")
     flow.dispatch(PSID, "/get_started")
     user = state.get(PSID)
-    assert user["step"] == "privacy"   # after reset + handle_start, step is "privacy"
-    assert user["first_name"] == ""    # reset clears the name
+    assert user["step"] == "paused"
 
 
 def test_wind_down_im_good_sends_farewell(mocker):
